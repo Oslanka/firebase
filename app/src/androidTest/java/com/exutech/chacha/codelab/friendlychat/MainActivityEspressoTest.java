@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.google.firebase.codelab.friendlychat;
+package com.exutech.chacha.codelab.friendlychat;
 
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.LargeTest;
+
+import com.exutech.chacha.MainActivity;
 
 import org.junit.Rule;
 import org.junit.Test;

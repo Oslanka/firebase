@@ -1,4 +1,4 @@
-package com.google.firebase.codelab.friendlychat;
+package com.exutech.chacha;
 
 import android.app.Application;
 

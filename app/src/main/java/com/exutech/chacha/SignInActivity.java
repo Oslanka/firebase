@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.firebase.codelab.friendlychat;
+package com.exutech.chacha;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -67,16 +67,16 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
-        setContentView(R.layout.activity_sign_in);
+        setContentView(com.exutech.chacha.R.layout.activity_sign_in);
 
         // Assign fields
-        mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
+        mSignInButton = (SignInButton) findViewById(com.exutech.chacha.R.id.sign_in_button);
 
         // Set click listeners
         mSignInButton.setOnClickListener(this);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken(getString(com.exutech.chacha.R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -109,7 +109,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             }
         };
 
-        LoginButton loginButton = (LoginButton) findViewById(R.id.loginfacebook);
+        LoginButton loginButton = (LoginButton) findViewById(com.exutech.chacha.R.id.loginfacebook);
         loginButton.setReadPermissions("email", "public_profile");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -128,10 +128,10 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             }
         });
         //// TODO: 16/5/31 邮箱登录
-        final EditText username = (EditText) findViewById(R.id.email_editext);
-        final EditText pass = (EditText) findViewById(R.id.email_pass);
+        final EditText username = (EditText) findViewById(com.exutech.chacha.R.id.email_editext);
+        final EditText pass = (EditText) findViewById(com.exutech.chacha.R.id.email_pass);
 
-        findViewById(R.id.email_login).setOnClickListener(new View.OnClickListener() {
+        findViewById(com.exutech.chacha.R.id.email_login).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 emailLogin(username, pass);
@@ -159,7 +159,7 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.sign_in_button:
+            case com.exutech.chacha.R.id.sign_in_button:
                 signIn();
                 break;
             default:

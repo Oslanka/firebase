@@ -1,35 +1,51 @@
 {
   "project_info": {
-    "project_number": "179197936212",
-    "firebase_url": "https://friendlychat-4fa90.firebaseio.com",
-    "project_id": "friendlychat-4fa90",
-    "storage_bucket": "friendlychat-4fa90.appspot.com"
+    "project_number": "264054698171",
+    "firebase_url": "https://chacha.firebaseio.com",
+    "project_id": "project-5270292775038908594",
+    "storage_bucket": "project-5270292775038908594.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:179197936212:android:b5d75907de594a2d",
+        "mobilesdk_app_id": "1:264054698171:android:0d29bb9ad188fc00",
         "android_client_info": {
-          "package_name": "com.google.firebase.codelab.friendlychat"
+          "package_name": "com.exutech.chacha"
         }
       },
       "oauth_client": [
         {
-          "client_id": "179197936212-7mggon54tuik2dc125lh5vt8b04d1h9p.apps.googleusercontent.com",
+          "client_id": "264054698171-h48osmablpo0so63ekpdvotpon0u78q6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.google.firebase.codelab.friendlychat",
+            "package_name": "com.exutech.chacha",
+            "certificate_hash": "4E507F823A27AE3A32E0F9F815C73380053800DF"
+          }
+        },
+        {
+          "client_id": "264054698171-b18fqbjopukj2ep3pei0pvic4ort51ou.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.exutech.chacha",
+            "certificate_hash": "209CF26D56A367B64AD7B33B153262250854C6FB"
+          }
+        },
+        {
+          "client_id": "264054698171-hr4u00bass54l5a9vshj1htc1d7ojtu5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.exutech.chacha",
             "certificate_hash": "6C1298F35ACEC47BC7744417E7FC581DB99AD020"
           }
         },
         {
-          "client_id": "179197936212-fjk5p3oiairvuocs946cmpfv85jlchi3.apps.googleusercontent.com",
+          "client_id": "264054698171-umf34h7msglg85mfodjghvjiqv82nujc.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDsDfd00R_nOJtno5T9rPPxh03xXbmc8F8"
+          "current_key": "AIzaSyAZ2Wv5YfSJe1WkiXsu0Pf28JD-gxxCsLc"
         }
       ],
       "services": {
@@ -40,7 +56,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "179197936212-fjk5p3oiairvuocs946cmpfv85jlchi3.apps.googleusercontent.com",
+              "client_id": "264054698171-umf34h7msglg85mfodjghvjiqv82nujc.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

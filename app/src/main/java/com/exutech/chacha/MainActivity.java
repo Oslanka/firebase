@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.firebase.codelab.friendlychat;
+package com.exutech.chacha;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -71,9 +71,9 @@ public class MainActivity extends AppCompatActivity implements
 
         public MessageViewHolder(View v) {
             super(v);
-            messageTextView = (TextView) itemView.findViewById(R.id.messageTextView);
-            messengerTextView = (TextView) itemView.findViewById(R.id.messengerTextView);
-            messengerImageView = (CircleImageView) itemView.findViewById(R.id.messengerImageView);
+            messageTextView = (TextView) itemView.findViewById(com.exutech.chacha.R.id.messageTextView);
+            messengerTextView = (TextView) itemView.findViewById(com.exutech.chacha.R.id.messengerTextView);
+            messengerImageView = (CircleImageView) itemView.findViewById(com.exutech.chacha.R.id.messengerImageView);
         }
     }
 
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+        setContentView(com.exutech.chacha.R.layout.activity_main);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mUsername = ANONYMOUS;
@@ -131,15 +131,15 @@ public class MainActivity extends AppCompatActivity implements
                 .addApi(Auth.GOOGLE_SIGN_IN_API)
                 .build();
 
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
+        mProgressBar = (ProgressBar) findViewById(com.exutech.chacha.R.id.progressBar);
+        mMessageRecyclerView = (RecyclerView) findViewById(com.exutech.chacha.R.id.messageRecyclerView);
         mLinearLayoutManager = new LinearLayoutManager(this);
         mLinearLayoutManager.setStackFromEnd(true);
 
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
         mFirebaseAdapter = new FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>(
                         FriendlyMessage.class,
-                        R.layout.item_message,
+                        com.exutech.chacha.R.layout.item_message,
                         MessageViewHolder.class,
                         mFirebaseDatabaseReference.child(MESSAGES_CHILD)) {
 
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements
                 viewHolder.messengerTextView.setText(friendlyMessage.getName());
                 if (friendlyMessage.getPhotoUrl() == null) {
                     viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.this,
-                            R.drawable.ic_account_circle_black_36dp));
+                            com.exutech.chacha.R.drawable.ic_account_circle_black_36dp));
                 } else {
                     Glide.with(MainActivity.this)
                             .load(friendlyMessage.getPhotoUrl())
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements
         mMessageRecyclerView.setAdapter(mFirebaseAdapter);
 
         // Initialize and request AdMob ad.
-        mAdView = (AdView) findViewById(R.id.adView);
+        mAdView = (AdView) findViewById(com.exutech.chacha.R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements
         // Fetch remote config.
         fetchConfig();
 
-        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
+        mMessageEditText = (EditText) findViewById(com.exutech.chacha.R.id.messageEditText);
         mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(mSharedPreferences
                 .getInt(CodelabPreferences.FRIENDLY_MSG_LENGTH, DEFAULT_MSG_LENGTH_LIMIT))});
         mMessageEditText.addTextChangedListener(new TextWatcher() {
@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        mSendButton = (Button) findViewById(R.id.sendButton);
+        mSendButton = (Button) findViewById(com.exutech.chacha.R.id.sendButton);
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -268,21 +268,21 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
+        inflater.inflate(com.exutech.chacha.R.menu.main_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.invite_menu:
+            case com.exutech.chacha.R.id.invite_menu:
                 sendInvitation();
                 return true;
-            case R.id.crash_menu:
+            case com.exutech.chacha.R.id.crash_menu:
                 FirebaseCrash.logcat(Log.ERROR, TAG, "crash caused");
                 causeCrash();
                 return true;
-            case R.id.sign_out_menu:
+            case com.exutech.chacha.R.id.sign_out_menu:
                 mFirebaseAuth.signOut();
                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);
                 mFirebaseUser = null;
@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements
                 mPhotoUrl = null;
                 startActivity(new Intent(this, SignInActivity.class));
                 return true;
-            case R.id.fresh_config_menu:
+            case com.exutech.chacha.R.id.fresh_config_menu:
                 fetchConfig();
                 return true;
             default:
@@ -303,9 +303,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void sendInvitation() {
-        Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
-                .setMessage(getString(R.string.invitation_message))
-                .setCallToActionText(getString(R.string.invitation_cta))
+        Intent intent = new AppInviteInvitation.IntentBuilder(getString(com.exutech.chacha.R.string.invitation_title))
+                .setMessage(getString(com.exutech.chacha.R.string.invitation_message))
+                .setCallToActionText(getString(com.exutech.chacha.R.string.invitation_cta))
                 .build();
         startActivityForResult(intent, REQUEST_INVITE);
     }
