@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="邮箱"
-        android:text="Oslanka@163.com" />
+        />
 
     <EditText
         android:id="@+id/email_pass"
@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         android:hint="密码"
         android:inputType="textPassword"
-        android:text="Cai8846464548640" />
+         />
 
     <Button
         android:id="@+id/email_login"
