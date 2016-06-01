@@ -30,4 +30,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "FCM Notification Message: " + remoteMessage.getNotification());
         Log.d(TAG, "FCM Data Message: " + remoteMessage.getData());
     }
+
+    @Override
+    public void onMessageSent(String s) {
+        super.onMessageSent(s);
+        Log.d(TAG, s);
+
+    }
 }
