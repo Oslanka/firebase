@@ -35,13 +35,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.exutech.chacha.bean.FriendlyMessage;
+import com.exutech.chacha.bean.FriendlyMessageDao;
+import com.exutech.chacha.utils.NetWorkUtil;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
@@ -54,19 +54,44 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.RemoteMessage;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
+
+    private static final String TAG = "MainActivity";
+    public static final String MESSAGES_CHILD = "chat/messages";
+    private static final int REQUEST_INVITE = 1;
+    public static final int DEFAULT_MSG_LENGTH_LIMIT = 10;
+    public static final String ANONYMOUS = "anonymous";
+    private static final String MESSAGE_SENT_EVENT = "message_sent";
+    private String mUsername;
+    private String mPhotoUrl;
+    private SharedPreferences mSharedPreferences;
+
+    private Button mSendButton;
+    private RecyclerView mMessageRecyclerView;
+    private LinearLayoutManager mLinearLayoutManager;
+    private RecyclerView.Adapter mFirebaseAdapter;
+    private DatabaseReference mFirebaseDatabaseReference;
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser mFirebaseUser;
+    private FirebaseAnalytics mFirebaseAnalytics;
+    private EditText mMessageEditText;
+//    private AdView mAdView;
+    private FirebaseRemoteConfig mFirebaseRemoteConfig;
+    private GoogleApiClient mGoogleApiClient;
+    private String mEmail;
+    private String mFirebaseUid;
+    private   List<FriendlyMessage> datasFromSQL;
+    private boolean networkUseful = true;
 
     public static class MessageViewHolder extends RecyclerView.ViewHolder {
         public TextView messageTextView;
@@ -81,30 +106,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private static final String TAG = "MainActivity";
-    public static final String MESSAGES_CHILD = "messages";
-    private static final int REQUEST_INVITE = 1;
-    public static final int DEFAULT_MSG_LENGTH_LIMIT = 10;
-    public static final String ANONYMOUS = "anonymous";
-    private static final String MESSAGE_SENT_EVENT = "message_sent";
-    private String mUsername;
-    private String mPhotoUrl;
-    private SharedPreferences mSharedPreferences;
-
-    private Button mSendButton;
-    private RecyclerView mMessageRecyclerView;
-    private LinearLayoutManager mLinearLayoutManager;
-    private FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder> mFirebaseAdapter;
-    private ProgressBar mProgressBar;
-    private DatabaseReference mFirebaseDatabaseReference;
-    private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
-    private FirebaseAnalytics mFirebaseAnalytics;
-    private EditText mMessageEditText;
-    private AdView mAdView;
-    private FirebaseRemoteConfig mFirebaseRemoteConfig;
-    private GoogleApiClient mGoogleApiClient;
-    private  String email;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,53 +130,44 @@ public class MainActivity extends AppCompatActivity implements
             if (mFirebaseUser.getPhotoUrl() != null) {
                 mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
             }
-            email= mFirebaseUser.getEmail();
-            
-
+            mEmail = mFirebaseUser.getEmail();
+            mFirebaseUid = mFirebaseUser.getUid();
         }
+
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API)
                 .build();
 
-        mProgressBar = (ProgressBar) findViewById(com.exutech.chacha.R.id.progressBar);
+//        mProgressBar = (ProgressBar) findViewById(com.exutech.chacha.R.id.progressBar);
         mMessageRecyclerView = (RecyclerView) findViewById(com.exutech.chacha.R.id.messageRecyclerView);
         mLinearLayoutManager = new LinearLayoutManager(this);
         mLinearLayoutManager.setStackFromEnd(true);
 
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        mFirebaseAdapter = new FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>(
-                FriendlyMessage.class,
-                com.exutech.chacha.R.layout.item_message,
-                MessageViewHolder.class,
-                mFirebaseDatabaseReference.child(MESSAGES_CHILD)) {
+        DatabaseReference child = mFirebaseDatabaseReference.child(MESSAGES_CHILD);
+//        FirebaseDatabase database = child.getDatabase();
+//        DatabaseReference reference = database.getReference();
 
-            @Override
-            protected void populateViewHolder(MessageViewHolder viewHolder, FriendlyMessage friendlyMessage, int position) {
-                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-                viewHolder.messageTextView.setText(friendlyMessage.getText());
-                if (!TextUtils.isEmpty(friendlyMessage.getName())) {
-                    viewHolder.messengerTextView.setText(friendlyMessage.getName());//用户名
-                }else {
-                    viewHolder.messengerTextView.setText(friendlyMessage.getEmail());//用户名不存在设置账户
-                }
-                //如果是本人 特殊处理
-                if (friendlyMessage.getEmail()!=null&&friendlyMessage.getEmail().equals(mFirebaseUser.getEmail()+"")){
-                    //自己
-                    viewHolder.messengerTextView.setText("我");
-                }
+        networkUseful = NetWorkUtil.checkNetworkAvailable(getApplicationContext());
+        if (networkUseful) {
+            mFirebaseAdapter = new FirebaseRecyclerAdapter<FriendlyMessage, MessageViewHolder>(
+                    FriendlyMessage.class,
+                    com.exutech.chacha.R.layout.item_message,
+                    MessageViewHolder.class,
+                    child) {
 
-                if (friendlyMessage.getPhotoUrl() == null) {
-                    viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.this,
-                            com.exutech.chacha.R.drawable.ic_account_circle_black_36dp));
-                } else {
-                    Glide.with(MainActivity.this)
-                            .load(friendlyMessage.getPhotoUrl())
-                            .into(viewHolder.messengerImageView);
+                @Override
+                protected void populateViewHolder(MessageViewHolder viewHolder, FriendlyMessage friendlyMessage, int position) {
+                    bindHoder(viewHolder, friendlyMessage);
+                    insert(friendlyMessage);
                 }
-            }
-        };
+            };
+        }else {
+            datasFromSQL  = getdatasFromSQL();
+            mFirebaseAdapter = new com.exutech.chacha.adapters.FirebaseRecyclerAdapter(datasFromSQL,this);//没网加载本地adaper
+        }
 
         mFirebaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
@@ -190,17 +182,18 @@ public class MainActivity extends AppCompatActivity implements
                     mMessageRecyclerView.scrollToPosition(positionStart);
                 }
             }
+
         });
 
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
         mMessageRecyclerView.setAdapter(mFirebaseAdapter);
 
-        // Initialize and request AdMob ad.
+   /*     // 广告
         mAdView = (AdView) findViewById(com.exutech.chacha.R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        mAdView.loadAd(adRequest);*/
 
-        // Initialize Firebase Measurement.
+        // 分析
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         // Initialize Firebase Remote Config.
@@ -250,46 +243,63 @@ public class MainActivity extends AppCompatActivity implements
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FriendlyMessage friendlyMessage = new FriendlyMessage(mMessageEditText.getText().toString(), mUsername,
-                        mPhotoUrl,email);
-                mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(friendlyMessage);
+                FriendlyMessage mFriendlyMessage= new FriendlyMessage();
+                mFriendlyMessage.setName(mUsername);
+                mFriendlyMessage.setUid(mFirebaseUid);
+                mFriendlyMessage.setId(System.currentTimeMillis());
+                mFriendlyMessage.setText(mMessageEditText.getText().toString());
+                mFriendlyMessage.setPhotoUrl(mPhotoUrl);
+                mFriendlyMessage.setEmail(mEmail);
+                mFirebaseDatabaseReference.child(MESSAGES_CHILD).push().setValue(mFriendlyMessage);
                 mMessageEditText.setText("");
                 mFirebaseAnalytics.logEvent(MESSAGE_SENT_EVENT, null);
+                if (!networkUseful){
+//                   handler.sendEmptyMessage(ADDMESSAGE);
+                    datasFromSQL.add(mFriendlyMessage);
+                    mFirebaseAdapter.notifyDataSetChanged();
+                    mMessageRecyclerView.scrollToPosition(datasFromSQL.size()-1);
+                }
+                insert(mFriendlyMessage);
 
-
-                    String token = FirebaseInstanceId.getInstance().getToken();
-
-                FirebaseMessaging.getInstance().send(
-                        new RemoteMessage.Builder(token + "@gcm.googleapis.com")
-                                .setMessageId(System.currentTimeMillis()+"")
-                                .addData("key", "value")
-                                .build());
             }
         });
     }
 
-    @Override
-    public void onPause() {
-        if (mAdView != null) {
-            mAdView.pause();
+
+    public void bindHoder(MessageViewHolder viewHolder, FriendlyMessage friendlyMessage ) {
+        viewHolder.messageTextView.setText(friendlyMessage.getText());
+        if (!TextUtils.isEmpty(friendlyMessage.getName())) {
+            viewHolder.messengerTextView.setText(friendlyMessage.getName());//用户名
+        } else {
+            viewHolder.messengerTextView.setText(friendlyMessage.getEmail());//用户名不存在设置账户
         }
-        super.onPause();
+        //如果是本人 特殊处理
+        if (friendlyMessage != null && friendlyMessage.getEmail() != null && mFirebaseUser != null && friendlyMessage.getEmail().equals(mFirebaseUser.getEmail() + "")) {
+            //自己
+            viewHolder.messengerTextView.setText("我");
+        }
+
+        if (friendlyMessage.getPhotoUrl() == null) {
+            viewHolder.messengerImageView.setImageDrawable(ContextCompat.getDrawable(MainActivity.this,
+                    R.drawable.ic_account_circle_black_36dp));
+        } else {
+            Glide.with(MainActivity.this)
+                    .load(friendlyMessage.getPhotoUrl())
+                    .into(viewHolder.messengerImageView);
+        }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mAdView != null) {
-            mAdView.resume();
-        }
+    private void insert(final FriendlyMessage friendlyMessage) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                getFriendlyMessageDao().insertOrReplace(friendlyMessage);
+            }
+        }).start();
     }
 
-    @Override
-    public void onDestroy() {
-        if (mAdView != null) {
-            mAdView.destroy();
-        }
-        super.onDestroy();
+    private List<FriendlyMessage>  getdatasFromSQL() {
+        return getFriendlyMessageDao().loadAll();
     }
 
     @Override
@@ -405,4 +415,9 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
+
+    private FriendlyMessageDao getFriendlyMessageDao() {
+        // 通过 BaseApplication 类提供的 getDaoSession() 获取具体 Dao
+        return ((BaseApp) this.getApplicationContext()).getDaoSession().getFriendlyMessageDao();
+    }
 }

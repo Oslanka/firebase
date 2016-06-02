@@ -1,0 +1,18 @@
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+            srcDir 'src-gen'
+        }
+    }
+}
+
+dependencies {
+    compile 'org.greenrobot:greendao-generator:2.2.0'
+}
+
+artifacts {
+    archives jar
+}

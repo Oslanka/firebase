@@ -4,7 +4,7 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
 
-    <LinearLayout
+    <RelativeLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,6 +17,8 @@
             android:src="@drawable/ic_account_circle_black_36dp"/>
 
         <LinearLayout
+            android:id="@+id/messageLayout"
+            android:layout_toRightOf="@+id/messengerImageView"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -38,7 +40,7 @@
                 android:layout_weight="0"/>
         </LinearLayout>
 
-    </LinearLayout>
+    </RelativeLayout>
 
 
 </LinearLayout>
