@@ -40,9 +40,9 @@ public  class FirebaseLisener  {
             @Override
             protected void populateViewHolder(MessageViewHolder viewHolder, FriendlyMessage friendlyMessage, int position) {
                 LogUtil.getInstance().d(friendlyMessage.getText());
-                if (firstPosition==0) {
-                    firstPosition=position;
-                }else if (position>firstPosition)
+//                if (firstPosition==0) {
+//                    firstPosition=position;
+//                }else if (position>firstPosition)
                     callbackFriendlyMessage.finish(friendlyMessage);
             }
         };

@@ -29,9 +29,10 @@ import de.greenrobot.daogenerator.Schema;
 public class ExampleDaoGenerator {
 
     public static void main(String[] args) throws Exception {
-        Schema schema = new Schema(1000, "com.exutech.chacha.bean");
+        Schema schema = new Schema(1, "com.exutech.chacha.bean");
 
         addFriendlyMessage(schema);
+
 
         new DaoGenerator().generateAll(schema, "C:\\Users\\EXUTECH007\\Documents\\firebase/app/src/main/java-gen");
     }
@@ -45,5 +46,6 @@ public class ExampleDaoGenerator {
         note.addStringProperty("photoUrl");
         note.addStringProperty("email").notNull();
     }
+
 
 }

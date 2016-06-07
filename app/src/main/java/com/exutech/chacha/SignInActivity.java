@@ -29,6 +29,8 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
@@ -47,6 +49,9 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class SignInActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
@@ -109,12 +114,35 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             }
         };
 
-        LoginButton loginButton = (LoginButton) findViewById(com.exutech.chacha.R.id.loginfacebook);
-        loginButton.setReadPermissions("email", "public_profile");
+        final LoginButton loginButton = (LoginButton) findViewById(com.exutech.chacha.R.id.loginfacebook);
+        loginButton.setReadPermissions("email", "public_profile","user_status","user_birthday","user_friends","user_location","user_hometown");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                handleFacebookAccessToken(loginResult.getAccessToken());
+//                String userId = loginResult.getAccessToken().getUserId();
+                GraphRequest request = GraphRequest.newMeRequest(
+                        loginResult.getAccessToken(),
+                        new GraphRequest.GraphJSONObjectCallback() {
+                            @Override
+                            public void onCompleted(JSONObject object, GraphResponse response) {
+                                Log.v("LoginActivity", response.toString());
+
+                                // Application code
+                                try {
+                                    String email = object.getString("email");
+                                    String birthday = object.getString("birthday"); // 01/31/1980 format
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        });
+                Bundle parameters = new Bundle();
+                // 字段参考  https://developers.facebook.com/docs/graph-api/reference/user
+                parameters.putString("fields", "id,name,picture,email,gender,birthday,first_name,last_name,location,locale,timezone,updated_time,verified,hometown,cover");
+                request.setParameters(parameters);
+                request.executeAsync();
+//                handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
             @Override
@@ -135,8 +163,23 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
             @Override
             public void onClick(View v) {
                 emailLogin(username, pass);
+//                mAuth.signInWithCustomToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1aWQiOiIyIiwiaWF0IjoxNDY1MTc3NDU2LCJleHAiOjE0NjUxODEwNTYsImF1ZCI6Imh0dHBzOi8vaWRlbnRpdHl0b29sa2l0Lmdvb2dsZWFwaXMuY29tL2dvb2dsZS5pZGVudGl0eS5pZGVudGl0eXRvb2xraXQudjEuSWRlbnRpdHlUb29sa2l0IiwiaXNzIjoiY2hhY2hhQHByb2plY3QtNTI3MDI5Mjc3NTAzODkwODU5NC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsInN1YiI6ImNoYWNoYUBwcm9qZWN0LTUyNzAyOTI3NzUwMzg5MDg1OTQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20ifQ.H6sB1_PyLw4G2aNMUlvhNS-QkExJt_h09FwbMoUDrZ7tVIdvQXOXswHkdClpRSPKM8aqXMc2-sXc3gwvSFhzlKuAcZc1ja85MJbitU7TqkEkCkYBhJdMNjv4xJXgw6NJ9Y2JjM9ojTyN8uLKOos0orZn0W7jBYgqTIJ61Uw4_d2aYrmy9HPEtzkp4pU4jYgR5WO8-QK9AIemrtZ5wCUN13sbfOlXYrh3IW99wROdG7HA1PR7gcZFEZC7ZaOw-6amH-ZgekREohfgzdVuFLZkUCxZScnkeVxPebdbIlRmaPesMBR2NhU3a8bnQeg_Lb68jIILfAvs7qe2lVyVOgdAuA")
+//                        .addOnCompleteListener(SignInActivity.this, new OnCompleteListener<AuthResult>() {
+//                            @Override
+//                            public void onComplete(@NonNull Task<AuthResult> task) {
+//                                Log.d(TAG, "signInWithCustomToken:onComplete:" + task.isSuccessful());
+//
+//                                // If sign in fails, display a message to the user. If sign in succeeds
+//                                // the auth state listener will be notified and logic to handle the
+//                                // signed in user can be handled in the listener.
+//                                loginOrNot(task);
+//                            }
+//                        });
+
             }
         });
+
+
 
 
     }
@@ -237,6 +280,8 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
         Log.d(TAG, "handleFacebookAccessToken:" + token);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+//        AuthCredential credential = FacebookAuthProvider.getCredential("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjaGFjaGFAcHJvamVjdC01MjcwMjkyNzc1MDM4OTA4NTk0LmlhbS5nc2VydmljZWFjY291bnQuY29tIiwic3ViIjoiY2hhY2hhQHByb2plY3QtNTI3MDI5Mjc3NTAzODkwODU5NC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsImF1ZCI6Imh0dHBzOlwvXC9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb21cL2dvb2dsZS5pZGVudGl0eS5pZGVudGl0eXRvb2xraXQudjEuSWRlbnRpdHlUb29sa2l0IiwiaWF0IjoxNDY0OTQzMjIxLCJleHAiOjE0NjQ5NDY4MjEsInVpZCI6MTIzLCJjbGFpbXMiOnsicHJlbWl1bV9hY2NvdW50IjpmYWxzZX19.skqyYybtPbRvpDuOHhflO1Vei3XPXmbhtPdF4qhIXkk");
+
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -264,7 +309,9 @@ public class SignInActivity extends AppCompatActivity implements GoogleApiClient
 
     private void loginOrNot(@NonNull Task<AuthResult> task) {
         if (!task.isSuccessful()) {
-            Log.w(TAG, "signInWithCredential", task.getException());
+            Exception exception = task.getException();
+            Log.w(TAG, "signInWithCredential", exception);
+
             Toast.makeText(SignInActivity.this, "Authentication failed.",
                     Toast.LENGTH_SHORT).show();
         } else {

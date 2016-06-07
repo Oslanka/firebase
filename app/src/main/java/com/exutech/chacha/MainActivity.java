@@ -34,8 +34,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.exutech.chacha.adapters.FirebaseRecyclerAdapter;
 import com.exutech.chacha.bean.FriendlyMessage;
-import com.exutech.chacha.bean.FriendlyMessageDao;
 import com.exutech.chacha.utils.LogUtil;
 import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.auth.api.Auth;
@@ -52,12 +52,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener {
@@ -91,15 +90,15 @@ public class MainActivity extends AppCompatActivity implements
     private String mFirebaseUid;
     private List<FriendlyMessage> datasFromSQL;
 
-    private  ExecutorService exec;
+//    private  ExecutorService exec;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(com.exutech.chacha.R.layout.activity_main);
-
+        setContentView(R.layout.activity_chat_main);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mUsername = ANONYMOUS;
 
@@ -121,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements
             mFirebaseUid = mFirebaseUser.getUid();
 //            MESSAGES_CHILD += getClild(mFirebaseUid,"8732e51c-8bb1-43b6-831e-414ae297655c");
             MESSAGES_CHILD += getClild(mFirebaseUid, "m5IQAT6t1Bemt65SW4ZHgZKEodr1");
+
             LogUtil.getInstance().d(mFirebaseUid);
         }
         mFirebaseDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -130,15 +130,16 @@ public class MainActivity extends AppCompatActivity implements
                 .addApi(Auth.GOOGLE_SIGN_IN_API)
                 .build();
 
-//        mProgressBar = (ProgressBar) findViewById(com.exutech.chacha.R.id.progressBar);
-        mMessageRecyclerView = (RecyclerView) findViewById(com.exutech.chacha.R.id.messageRecyclerView);
+//        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mMessageRecyclerView = (RecyclerView) findViewById(R.id.messageRecyclerView);
         mLinearLayoutManager = new LinearLayoutManager(this);
         mLinearLayoutManager.setStackFromEnd(true);
-        datasFromSQL = getdatasFromSQL();
-        mFirebaseAdapter = new com.exutech.chacha.adapters.FirebaseRecyclerAdapter(datasFromSQL, this,mFirebaseUser);//没网加载本地adaper
+        datasFromSQL = new ArrayList<>();//getdatasFromSQL();
+        mFirebaseAdapter = new FirebaseRecyclerAdapter(datasFromSQL, this,mFirebaseUser);//没网加载本地adaper
         mMessageRecyclerView.setLayoutManager(mLinearLayoutManager);
         mMessageRecyclerView.setAdapter(mFirebaseAdapter);//本地数据
-        mMessageRecyclerView2 = (RecyclerView) findViewById(com.exutech.chacha.R.id.messageRecyclerView2);
+
+        mMessageRecyclerView2 = (RecyclerView) findViewById(R.id.messageRecyclerView2);
         mLinearLayoutManager2 = new LinearLayoutManager(this);
         FirebaseLisener.getInstance().onFirebaseLisener(mMessageRecyclerView2, mLinearLayoutManager2, mFirebaseDatabaseReference, MESSAGES_CHILD,new FirebaseLisener.CallbackFriendlyMessage() {
             @Override
@@ -154,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
    /*     // 广告
-        mAdView = (AdView) findViewById(com.exutech.chacha.R.id.adView);
+        mAdView = (AdView) findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);*/
 
@@ -182,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements
         // Fetch remote config.
         fetchConfig();
 
-        mMessageEditText = (EditText) findViewById(com.exutech.chacha.R.id.messageEditText);
+        mMessageEditText = (EditText) findViewById(R.id.messageEditText);
         mMessageEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(mSharedPreferences
                 .getInt(CodelabPreferences.FRIENDLY_MSG_LENGTH, DEFAULT_MSG_LENGTH_LIMIT))});
         mMessageEditText.addTextChangedListener(new TextWatcher() {
@@ -204,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        mSendButton = (Button) findViewById(com.exutech.chacha.R.id.sendButton);
+        mSendButton = (Button) findViewById(R.id.sendButton);
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -228,43 +229,43 @@ public class MainActivity extends AppCompatActivity implements
 
             }
         });
-        exec = Executors.newSingleThreadExecutor();//单线程
+//        exec = Executors.newSingleThreadExecutor();//单线程
     }
 
 
 
 
     private synchronized void insert(final FriendlyMessage friendlyMessage) {
-        exec.execute(new Runnable() {
-            @Override
-            public void run() {
-                getFriendlyMessageDao().insertOrReplace(friendlyMessage);
-            }
-        });
+//        exec.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                getFriendlyMessageDao().insertOrReplace(friendlyMessage);
+//            }
+//        });
     }
 
-    private List<FriendlyMessage> getdatasFromSQL() {
-        return getFriendlyMessageDao().loadAll();
-    }
+//    private List<FriendlyMessage> getdatasFromSQL() {
+//        return getFriendlyMessageDao().loadAll();
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(com.exutech.chacha.R.menu.main_menu, menu);
+        inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case com.exutech.chacha.R.id.invite_menu:
+            case R.id.invite_menu:
                 sendInvitation();
                 return true;
-            case com.exutech.chacha.R.id.crash_menu:
+            case R.id.crash_menu:
                 FirebaseCrash.logcat(Log.ERROR, TAG, "crash caused");
                 causeCrash();
                 return true;
-            case com.exutech.chacha.R.id.sign_out_menu:
+            case R.id.sign_out_menu:
                 mFirebaseAuth.signOut();
                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);
                 mFirebaseUser = null;
@@ -272,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements
                 mPhotoUrl = null;
                 startActivity(new Intent(this, SignInActivity.class));
                 return true;
-            case com.exutech.chacha.R.id.fresh_config_menu:
+            case R.id.fresh_config_menu:
                 fetchConfig();
                 return true;
             default:
@@ -285,9 +286,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void sendInvitation() {
-        Intent intent = new AppInviteInvitation.IntentBuilder(getString(com.exutech.chacha.R.string.invitation_title))
-                .setMessage(getString(com.exutech.chacha.R.string.invitation_message))
-                .setCallToActionText(getString(com.exutech.chacha.R.string.invitation_cta))
+        Intent intent = new AppInviteInvitation.IntentBuilder(getString(R.string.invitation_title))
+                .setMessage(getString(R.string.invitation_message))
+                .setCallToActionText(getString(R.string.invitation_cta))
                 .build();
         startActivityForResult(intent, REQUEST_INVITE);
     }
@@ -361,11 +362,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    private FriendlyMessageDao getFriendlyMessageDao() {
-        // 通过 BaseApplication 类提供的 getDaoSession() 获取具体 Dao
-        return ((BaseApp) this.getApplicationContext()).getDaoSession().getFriendlyMessageDao();
-    }
-
     private String getClild(String uid, String uid2) {
         String[] arr = {uid.replace(".", ""), uid2.replace(".", "")};
         Arrays.sort(arr);
@@ -375,6 +371,5 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        exec.shutdown();
     }
 }
